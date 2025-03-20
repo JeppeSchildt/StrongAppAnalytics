@@ -1,20 +1,32 @@
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import datetime as dt
 from simple_term_menu import TerminalMenu
 
-df = pd.read_csv ('./Data/strong.csv')
+df = pd.read_csv ('../Data/strongR.csv')
+
+df['Reps'] = pd.to_numeric(df['Reps'], errors='coerce')
+df['Weight (kg)'] = pd.to_numeric(df['Weight (kg)'], errors='coerce')
+
+df = df.dropna(subset=['Reps'])
+df = df.dropna(subset=['Weight (kg)'])
+
+
 #Num:    0        1              2           3              4           5        6        7        8        9        10             11
-Keys = ["Date","Workout Name","Duration","Exercise Name","Set Order","Weight","Reps","Distance","Seconds","Notes","Workout Notes","RPE"]
+Keys = ["Workout #","Date","Workout Name","Duration (sec)","Exercise Name","Set Order","Weight (kg)","Reps","RPE","Distance (meters)","Seconds","Notes","Workout Notes"]
 # User list comprehension to create a list of lists from Dataframe rows
 list_of_rows = [list(row) for row in df.values]
+
+
 list_of_dict = []
 for workout in list_of_rows:
    workout_dict = {}
    for key_index,data in enumerate(workout):
-      if Keys[key_index] == 'Weight':
+      if Keys[key_index] == 'Weight (kg)':
          workout_dict[Keys[key_index]] = float(data)
       elif Keys[key_index] == 'Reps':
          workout_dict[Keys[key_index]] = int(data)
@@ -23,6 +35,7 @@ for workout in list_of_rows:
    list_of_dict.append(workout_dict)
 #print(list_of_dict)
 all_workouts = list_of_dict
+#print(all_workouts)
 all_exercise_names = list(set([i["Exercise Name"] for i in all_workouts]))
 # 1RM
 def OneRepMax(weight,reps):
@@ -33,20 +46,20 @@ def OneRepMax(weight,reps):
 def total_volume(with_plot = True):
    volume_of_every_workout = []
    current_date = all_workouts[0]['Date']
-   total_volume_of_current_workout = 0
+   total_volume_of_current_workout = 0 
    for workout in all_workouts:
       if workout['Date'] != current_date:
          volume_of_every_workout.append({'Date':current_date,'Total Volume':total_volume_of_current_workout})
          total_volume_of_current_workout = 0
          current_date = workout['Date']
-      total_volume_of_current_workout += workout["Weight"] * workout["Reps"] 
+      total_volume_of_current_workout += workout["Weight (kg)"] * workout["Reps"] 
    if total_volume_of_current_workout != 0:
       volume_of_every_workout.append({'Date':current_date,'Total Volume':total_volume_of_current_workout})
    if with_plot:
       x_axis = []
       y_axis = []
       for i in volume_of_every_workout:
-         x_axis.append( dt.datetime.fromisoformat( i["Date"] ))
+         x_axis.append(dt.datetime.strptime(i["Date"],"%d-%m-%Y %H:%M"))
          y_axis.append( i["Total Volume"] )
 
       clist = [(0, "red"), (0.125, "red"), (0.25, "orange"), (0.5, "green"), 
@@ -83,15 +96,15 @@ def best_set(exercise_name = "Snatch (Barbell)", with_plot = True):
          best_sets.append({"Date":current_date, "1RM":current_best_set})
          current_best_set = 0
          current_date = workout["Date"]
-      if current_best_set <= OneRepMax(workout['Weight'],workout['Reps']):
-         current_best_set = OneRepMax(workout['Weight'],workout['Reps'])
+      if current_best_set <= OneRepMax(workout['Weight (kg)'],workout['Reps']):
+         current_best_set = OneRepMax(workout['Weight (kg)'],workout['Reps'])
    if current_best_set != 0:
       best_sets.append({"Date":current_date, "1RM":current_best_set})
    if with_plot:
       x_axis = []
       y_axis = []
       for i in best_sets:
-         x_axis.append( dt.datetime.fromisoformat( i["Date"] ))
+         x_axis.append(dt.datetime.strptime(i["Date"],"%d-%m-%Y %H:%M"))
          y_axis.append( i["1RM"] )
       plt.style.use('dark_background')
       plt.rcParams["figure.figsize"] = (12,7)
@@ -122,14 +135,14 @@ def total_volume_per_exercise(exercise_name = "Snatch (Barbell)", with_plot = Tr
          volume_of_every_set.append({"Date":current_date, "Volume":current_sets_volume})
          current_sets_volume = 0
          current_date = workout["Date"]
-      current_sets_volume += workout["Weight"] * workout["Reps"] 
+      current_sets_volume += workout["Weight (kg)"] * workout["Reps"] 
    if current_sets_volume != 0:
       volume_of_every_set.append({"Date":current_date, "Volume":current_sets_volume})
    if with_plot:
       x_axis = []
       y_axis = []
       for i in volume_of_every_set:
-         x_axis.append( dt.datetime.fromisoformat( i["Date"] ))
+         x_axis.append(dt.datetime.strptime(i["Date"],"%d-%m-%Y %H:%M"))
          y_axis.append( i["Volume"] )
       plt.style.use('dark_background')
       plt.rcParams["figure.figsize"] = (12,7)
@@ -157,8 +170,8 @@ def PR_progression(exercise_name = "Snatch (Barbell)", with_plot = True):
    for workout in all_workouts:
       if workout["Exercise Name"] != exercise_name:
          continue
-      if current_PR <= OneRepMax(workout["Weight"],workout["Reps"]):
-         current_PR = OneRepMax(workout["Weight"],workout["Reps"])
+      if current_PR <= OneRepMax(workout["Weight (kg)"],workout["Reps"]):
+         current_PR = OneRepMax(workout["Weight (kg)"],workout["Reps"])
          current_date = workout["Date"]
 
          all_PRs.append({"Date":current_date, "PR":current_PR})
@@ -167,7 +180,7 @@ def PR_progression(exercise_name = "Snatch (Barbell)", with_plot = True):
       x_axis = []
       y_axis = []
       for i in all_PRs:
-         x_axis.append( dt.datetime.fromisoformat( i["Date"] ))
+         x_axis.append(dt.datetime.strptime(i["Date"],"%d-%m-%Y %H:%M"))
          y_axis.append( i["PR"] )
       plt.style.use('dark_background')
       plt.rcParams["figure.figsize"] = (12,7)
@@ -208,7 +221,7 @@ def max_consecutive_reps(exercise_name = "Snatch (Barbell)", with_plot = True):
       x_axis = []
       y_axis = []
       for i in most_reps:
-         x_axis.append( dt.datetime.fromisoformat( i["Date"] ))
+         x_axis.append(dt.datetime.strptime(i["Date"],"%d-%m-%Y %H:%M"))
          y_axis.append( i["Most Reps"] )
       plt.style.use('dark_background')
       plt.rcParams["figure.figsize"] = (12,7)
