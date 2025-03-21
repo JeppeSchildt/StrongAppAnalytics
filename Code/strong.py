@@ -1,17 +1,16 @@
 import pandas as pd
 import numpy as np
-import matplotlib
-matplotlib.use('TkAgg')
+#import matplotlib
+#matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import datetime as dt
 from simple_term_menu import TerminalMenu
 
-df = pd.read_csv ('../Data/strongR.csv')
+df = pd.read_csv ('../Data/strong.csv')
 
 df['Reps'] = pd.to_numeric(df['Reps'], errors='coerce')
 df['Weight (kg)'] = pd.to_numeric(df['Weight (kg)'], errors='coerce')
-
 df = df.dropna(subset=['Reps'])
 df = df.dropna(subset=['Weight (kg)'])
 
