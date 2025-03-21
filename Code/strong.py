@@ -7,7 +7,7 @@ import matplotlib.colors as mcolors
 import datetime as dt
 from simple_term_menu import TerminalMenu
 
-df = pd.read_csv ('../Data/strong.csv')
+df = pd.read_csv ('./Data/strong.csv')
 
 df['Reps'] = pd.to_numeric(df['Reps'], errors='coerce')
 df['Weight (kg)'] = pd.to_numeric(df['Weight (kg)'], errors='coerce')
@@ -32,9 +32,7 @@ for workout in list_of_rows:
       else:
          workout_dict[Keys[key_index]] = data
    list_of_dict.append(workout_dict)
-#print(list_of_dict)
 all_workouts = list_of_dict
-#print(all_workouts)
 all_exercise_names = list(set([i["Exercise Name"] for i in all_workouts]))
 # 1RM
 def OneRepMax(weight,reps):
@@ -60,7 +58,6 @@ def total_volume(with_plot = True):
       for i in volume_of_every_workout:
          x_axis.append(dt.datetime.strptime(i["Date"],"%d-%m-%Y %H:%M"))
          y_axis.append( i["Total Volume"] )
-
       clist = [(0, "red"), (0.125, "red"), (0.25, "orange"), (0.5, "green"), 
                (0.7, "green"), (0.75, "blue"), (1, "blue")]
       rvb = mcolors.LinearSegmentedColormap.from_list("", clist)
@@ -79,8 +76,6 @@ def total_volume(with_plot = True):
       plt.cla()
       plt.clf()
    return volume_of_every_workout
-
-
 
 
 # Best set over time per given exercise
@@ -121,7 +116,6 @@ def best_set(exercise_name = "Snatch (Barbell)", with_plot = True):
    return best_sets
 
 
-
 # Total volume over time per given exercise
 def total_volume_per_exercise(exercise_name = "Snatch (Barbell)", with_plot = True):
    volume_of_every_set = []
@@ -157,8 +151,6 @@ def total_volume_per_exercise(exercise_name = "Snatch (Barbell)", with_plot = Tr
       plt.cla()
       plt.clf()
    return volume_of_every_set
-
-
 
 
 # PR progression over time per given exercise
@@ -197,9 +189,6 @@ def PR_progression(exercise_name = "Snatch (Barbell)", with_plot = True):
    return all_PRs
 
 
-
-
-
 # Max consecutive reps 
 def max_consecutive_reps(exercise_name = "Snatch (Barbell)", with_plot = True):
    most_reps = []
@@ -236,8 +225,6 @@ def max_consecutive_reps(exercise_name = "Snatch (Barbell)", with_plot = True):
       plt.cla()
       plt.clf()
    return most_reps
-
-
 
 #total_volume()
 #best_set()
